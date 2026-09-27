@@ -8,13 +8,25 @@ locals {
   }
 }
 
+data "archive_file" "start_lambda" {
+  type        = "zip"
+  source_file = "${path.module}/../lambda/start_instances.py"
+  output_path = "${path.module}/start_instances.zip"
+}
+
+data "archive_file" "stop_lambda" {
+  type        = "zip"
+  source_file = "${path.module}/../lambda/stop_instances.py"
+  output_path = "${path.module}/stop_instances.zip"
+}
+
 resource "aws_lambda_function" "start" {
   function_name    = "${local.name_prefix}-start"
   role             = aws_iam_role.lambda.arn
   runtime          = var.lambda_runtime
   handler          = "start_instances.lambda_handler"
-  filename         = "${path.module}/../lambda/start_instances.zip"
-  source_code_hash = filebase64sha256("${path.module}/../lambda/start_instances.zip")
+  filename         = data.archive_file.start_lambda.output_path
+  source_code_hash = data.archive_file.start_lambda.output_base64sha256
   timeout          = 60
 
   environment {
@@ -30,8 +42,8 @@ resource "aws_lambda_function" "stop" {
   role             = aws_iam_role.lambda.arn
   runtime          = var.lambda_runtime
   handler          = "stop_instances.lambda_handler"
-  filename         = "${path.module}/../lambda/stop_instances.zip"
-  source_code_hash = filebase64sha256("${path.module}/../lambda/stop_instances.zip")
+  filename         = data.archive_file.stop_lambda.output_path
+  source_code_hash = data.archive_file.stop_lambda.output_base64sha256
   timeout          = 60
 
   environment {
