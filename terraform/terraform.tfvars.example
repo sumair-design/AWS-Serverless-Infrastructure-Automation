@@ -1,0 +1,9 @@
+aws_region        = "ap-south-1"
+project_name      = "serverless-ec2-automation"
+environment       = "nonprod"
+schedule_tag_key  = "AutoSchedule"
+schedule_tag_value = "true"
+
+# EventBridge cron expressions use UTC.
+start_schedule = "cron(30 7 ? * SUN-THU *)"
+stop_schedule  = "cron(30 14 ? * SUN-THU *)"
